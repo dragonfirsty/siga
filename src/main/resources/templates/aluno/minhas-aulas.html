@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minhas Aulas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>Minhas aulas</h1>
+    <p style="margin-bottom:16px">
+        <a class="btn" th:href="@{/aluno/frequencia}">Ver minha frequencia</a>
+    </p>
+
+    <table th:if="${!aulas.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Data</th>
+            <th>Turma</th>
+            <th>Conteudo</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="aula : ${aulas}">
+            <td th:text="${#temporals.format(aula.data, 'dd/MM/yyyy')}">01/01/2026</td>
+            <td th:text="${aula.turmaNome}">Turma</td>
+            <td th:text="${aula.conteudo}">Conteudo</td>
+            <td>
+                <span class="badge" th:classappend="${aula.status.name() == 'REALIZADA'} ? 'badge-realizada' : 'badge-agendada'"
+                      th:text="${aula.status}">AGENDADA</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="card" th:if="${aulas.isEmpty()}">
+        <p>Voce ainda nao tem aulas registradas.</p>
+    </div>
+</main>
+</body>
+</html>
