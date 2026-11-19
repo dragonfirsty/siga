@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">SIGA 2</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, Helvetica, sans-serif; background: #f2f3f5; color: #1b1b1b; }
+        header { background: #1f2d3d; color: #fff; padding: 14px 24px; }
+        header a { color: #cdd5df; text-decoration: none; margin-right: 18px; font-size: 14px; }
+        header a:hover { color: #fff; }
+        header .marca { font-weight: bold; font-size: 18px; margin-right: 28px; color: #fff; }
+        main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        h1 { font-size: 22px; margin-bottom: 16px; color: #1f2d3d; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #d7d9dd; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e4e5e8; font-size: 14px; }
+        th { background: #eceef1; color: #555; text-transform: uppercase; font-size: 12px; }
+        .btn { display: inline-block; padding: 8px 16px; background: #1f2d3d; color: #fff; text-decoration: none; border: none; cursor: pointer; font-size: 14px; }
+        .btn:hover { background: #2d4259; }
+        .btn-sec { background: #fff; color: #1f2d3d; border: 1px solid #1f2d3d; }
+        .card { background: #fff; border: 1px solid #d7d9dd; padding: 20px; margin-bottom: 16px; }
+        .campo { margin-bottom: 14px; }
+        .campo label { display: block; font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+        .campo input, .campo select { width: 100%; padding: 8px; border: 1px solid #bbb; font-size: 14px; }
+        .ok { color: #1a7f37; font-weight: bold; }
+        .nao { color: #c0392b; font-weight: bold; }
+        .badge { padding: 2px 8px; font-size: 12px; border-radius: 2px; }
+        .badge-agendada { background: #e0ecff; color: #224; }
+        .badge-realizada { background: #dbf0db; color: #060; }
+    </style>
+</head>
+<body>
+<header th:fragment="menu">
+    <a class="marca" th:href="@{/}">SIGA 2</a>
+    <a th:href="@{/professor/aulas}">Professor</a>
+    <a th:href="@{/aluno/aulas}">Aluno</a>
+    <a th:href="@{/h2-console}">Banco (H2)</a>
+    <a th:href="@{/swagger-ui.html}">API</a>
+</header>
+</body>
+</html>

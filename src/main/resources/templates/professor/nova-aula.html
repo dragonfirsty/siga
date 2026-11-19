@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nova Aula')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>Criar nova aula</h1>
+    <div class="card">
+        <form th:action="@{/professor/aulas/nova}" method="post">
+            <div class="campo">
+                <label for="turmaId">Turma</label>
+                <select id="turmaId" name="turmaId" required>
+                    <option value="">Selecione a turma</option>
+                    <option th:each="turma : ${turmas}"
+                            th:value="${turma.id}"
+                            th:text="${turma.nome} + ' - ' + ${turma.disciplina}">Turma</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="data">Data</label>
+                <input type="date" id="data" name="data" required>
+            </div>
+            <div class="campo">
+                <label for="horaInicio">Hora de inicio</label>
+                <input type="time" id="horaInicio" name="horaInicio" required>
+            </div>
+            <div class="campo">
+                <label for="horaFim">Hora de fim</label>
+                <input type="time" id="horaFim" name="horaFim">
+            </div>
+            <div class="campo">
+                <label for="conteudo">Conteudo da aula</label>
+                <input type="text" id="conteudo" name="conteudo" maxlength="255" placeholder="Ex: Introducao a Ajax">
+            </div>
+            <button type="submit" class="btn">Criar e registrar presenca</button>
+            <a class="btn btn-sec" th:href="@{/professor/aulas}">Cancelar</a>
+        </form>
+    </div>
+</main>
+</body>
+</html>
