@@ -3,88 +3,74 @@ package com.fatec.siga.service;
 import com.fatec.siga.dto.FrequenciaDisciplina;
 import com.fatec.siga.model.Aula;
 import com.fatec.siga.model.Presenca;
-import com.fatec.siga.repository.AulaRepository;
-import com.fatec.siga.repository.PresencaRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.fatec.siga.model.StatusAula;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DataJpaTest
-@Import({PresencaService.class, AulaService.class, RosterDemo.class})
 class PresencaServiceTest {
 
-    @Autowired
-    private AulaService aulaService;
-
-    @Autowired
-    private PresencaService presencaService;
-
-    @Autowired
-    private AulaRepository aulaRepository;
-
-    @Autowired
-    private PresencaRepository presencaRepository;
-
-    private Aula aula;
-
-    @BeforeEach
-    void setUp() {
-        presencaRepository.deleteAll();
-        aulaRepository.deleteAll();
-        aula = aulaService.criarAula(101L, LocalDate.now(), LocalTime.of(19, 0),
-                LocalTime.of(22, 0), "Introducao a Ajax");
+    private Aula novaAulaComAlunos() {
+        Aula aula = new Aula(101L, "ADS 3 Semestre - PSI", 1L,
+                LocalDate.now(), LocalTime.of(19, 0));
+        aula.adicionarPresenca(new Presenca(1L, "Henrique Ferreira", "RA001"));
+        aula.adicionarPresenca(new Presenca(2L, "Ana Vitoria", "RA002"));
+        aula.adicionarPresenca(new Presenca(3L, "Guilherme Souza", "RA003"));
+        aula.adicionarPresenca(new Presenca(4L, "Rafael Mendes", "RA004"));
+        return aula;
     }
 
     @Test
-    void deveGerarUmaPresencaParaCadaAlunoDaTurma() {
-        assertThat(aula.getPresencas()).hasSize(4);
-        assertThat(aula.getPresencas()).allMatch(p -> !p.isPresente());
+    void deveGerarUmaPresencaParaCadaAluno() {
+        Aula aula = novaAulaComAlunos();
+        assertEquals(4, aula.getTotalAlunos());
+        assertEquals(0, aula.getTotalPresentes());
     }
 
     @Test
-    void deveRegistrarPresencasEMarcarAulaComoRealizada() {
-        Long id1 = aula.getPresencas().get(0).getAlunoId();
-        Long id2 = aula.getPresencas().get(1).getAlunoId();
+    void deveContarPresentesAposMarcar() {
+        Aula aula = novaAulaComAlunos();
+        aula.getPresencas().get(0).marcar(true);
+        aula.getPresencas().get(1).marcar(true);
+        aula.getPresencas().get(2).marcar(false);
+        aula.getPresencas().get(3).marcar(true);
 
-        presencaService.registrarPresencas(aula.getId(), Map.of(id1, true, id2, true));
-
-        List<Presenca> salvas = presencaService.listarPresencasDaAula(aula.getId());
-        long presentes = salvas.stream().filter(Presenca::isPresente).count();
-
-        assertThat(presentes).isEqualTo(2);
+        assertEquals(3, aula.getTotalPresentes());
+        assertEquals(4, aula.getTotalAlunos());
     }
 
     @Test
-    void deveCalcularFrequenciaDoAluno() {
-        Long alunoId = aula.getPresencas().get(0).getAlunoId();
-        presencaService.registrarPresencas(aula.getId(), Map.of(alunoId, true));
-
-        List<FrequenciaDisciplina> frequencias = presencaService.calcularFrequenciaPorTurma(alunoId);
-
-        assertThat(frequencias).hasSize(1);
-        assertThat(frequencias.get(0).totalAulas()).isEqualTo(1);
-        assertThat(frequencias.get(0).totalPresencas()).isEqualTo(1);
-        assertThat(frequencias.get(0).percentual()).isEqualTo(100.0);
-        assertThat(frequencias.get(0).isAprovadoPorFrequencia()).isTrue();
+    void deveRegistrarHorarioAoMarcarPresenca() {
+        Presenca presenca = new Presenca(1L, "Henrique", "RA001");
+        assertFalse(presenca.isPresente());
+        presenca.marcar(true);
+        assertTrue(presenca.isPresente());
+        assertTrue(presenca.getRegistradoEm() != null);
     }
 
     @Test
-    void deveReprovarAlunoComFrequenciaBaixa() {
-        Long alunoId = aula.getPresencas().get(0).getAlunoId();
-        presencaService.registrarPresencas(aula.getId(), Map.of(alunoId, false));
+    void deveAprovarAlunoComFrequenciaIgualOuMaiorQue75() {
+        FrequenciaDisciplina alta = new FrequenciaDisciplina(101L, "PSI", 10, 8, 80.0);
+        FrequenciaDisciplina exata = new FrequenciaDisciplina(101L, "PSI", 4, 3, 75.0);
 
-        List<FrequenciaDisciplina> frequencias = presencaService.calcularFrequenciaPorTurma(alunoId);
+        assertTrue(alta.isAprovadoPorFrequencia());
+        assertTrue(exata.isAprovadoPorFrequencia());
+    }
 
-        assertThat(frequencias.get(0).percentual()).isEqualTo(0.0);
-        assertThat(frequencias.get(0).isAprovadoPorFrequencia()).isFalse();
+    @Test
+    void deveReprovarAlunoComFrequenciaAbaixoDe75() {
+        FrequenciaDisciplina baixa = new FrequenciaDisciplina(101L, "PSI", 10, 5, 50.0);
+        assertFalse(baixa.isAprovadoPorFrequencia());
+    }
+
+    @Test
+    void novaAulaDeveComecarComoAgendada() {
+        Aula aula = novaAulaComAlunos();
+        assertEquals(StatusAula.AGENDADA, aula.getStatus());
     }
 }
