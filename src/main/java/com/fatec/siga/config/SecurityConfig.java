@@ -15,6 +15,7 @@ public class SecurityConfig {
 		http
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()
+						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/api/cursos/**").hasRole("ADMIN")
 						.requestMatchers("/professor/**").hasRole("PROFESSOR")
@@ -30,7 +31,9 @@ public class SecurityConfig {
 						.logoutSuccessUrl("/login?logout")
 						.invalidateHttpSession(true)
 						.deleteCookies("JSESSIONID")
-						.permitAll());
+						.permitAll())
+				.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+				.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));
 
 		return http.build();
 	}
