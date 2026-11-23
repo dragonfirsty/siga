@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Cursos - SIGA</title>
+</head>
+<body>
+	<main>
+		<h1>Cursos</h1>
+
+		<p th:if="${mensagem}" th:text="${mensagem}" role="status"></p>
+		<a th:href="@{/admin/cursos/novo}">Novo curso</a>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Código</th>
+					<th>Nome</th>
+					<th>Status</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="curso : ${cursos}">
+					<td th:text="${curso.codigo}"></td>
+					<td th:text="${curso.nome}"></td>
+					<td th:text="${curso.ativo ? 'Ativo' : 'Inativo'}"></td>
+					<td>
+						<a th:href="@{/admin/cursos/{id}/editar(id=${curso.id})}">Editar</a>
+						<form th:action="@{/admin/cursos/{id}/excluir(id=${curso.id})}" method="post">
+							<button type="submit">Excluir</button>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</main>
+</body>
+</html>
