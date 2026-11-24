@@ -11,18 +11,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/professor")
+@RequestMapping("/professor/aulas")
 public class ProfessorController {
-
-    private static final Long PROFESSOR_LOGADO = 1L;
 
     private final AulaService aulaService;
     private final PresencaService presencaService;
@@ -34,32 +32,44 @@ public class ProfessorController {
         this.roster = roster;
     }
 
-    @GetMapping("/aulas")
-    public String listarAulas(Model model) {
-        model.addAttribute("aulas", aulaService.listarPorProfessor(PROFESSOR_LOGADO));
+    @GetMapping
+    public String listarAulas(Model model, Authentication authentication) {
+        Long professorId = buscarProfessorId(authentication);
+        if (professorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("aulas", aulaService.listarPorProfessor(professorId));
         return "professor/aulas";
     }
 
-    @GetMapping("/aulas/nova")
-    public String formNovaAula(Model model) {
-        model.addAttribute("turmas", roster.listarTurmasDoProfessor(PROFESSOR_LOGADO));
+    @GetMapping("/nova")
+    public String formNovaAula(Model model, Authentication authentication) {
+        Long professorId = buscarProfessorId(authentication);
+        if (professorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("turmas", roster.listarTurmasDoProfessor(professorId));
         return "professor/nova-aula";
     }
 
-    @PostMapping("/aulas/nova")
+    @PostMapping("/nova")
     public String criarAula(
             @RequestParam Long turmaId,
             @RequestParam String data,
             @RequestParam String horaInicio,
             @RequestParam(required = false) String horaFim,
-            @RequestParam(required = false) String conteudo) {
+            @RequestParam(required = false) String conteudo,
+            Authentication authentication) {
+        if (buscarProfessorId(authentication) == null) {
+            return "redirect:/login";
+        }
 
         LocalTime fim = (horaFim == null || horaFim.isBlank()) ? null : LocalTime.parse(horaFim);
         Aula aula = aulaService.criarAula(turmaId, LocalDate.parse(data), LocalTime.parse(horaInicio), fim, conteudo);
         return "redirect:/professor/aulas/" + aula.getId() + "/presenca";
     }
 
-    @GetMapping("/aulas/{id}/presenca")
+    @GetMapping("/{id}/presenca")
     public String formPresenca(@PathVariable Long id, Model model) {
         Aula aula = aulaService.buscarPorId(id);
         model.addAttribute("aula", aula);
@@ -67,7 +77,7 @@ public class ProfessorController {
         return "professor/registrar-presenca";
     }
 
-    @PostMapping("/aulas/{id}/presenca")
+    @PostMapping("/{id}/presenca")
     public String salvarPresenca(@PathVariable Long id, @RequestParam Map<String, String> params) {
         Aula aula = aulaService.buscarPorId(id);
         Map<Long, Boolean> marcacoes = new HashMap<>();
@@ -77,5 +87,14 @@ public class ProfessorController {
         }
         presencaService.registrarPresencas(id, marcacoes);
         return "redirect:/professor/aulas";
+    }
+
+    private Long buscarProfessorId(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+        return roster.buscarProfessorPorEmail(authentication.getName())
+            .map(professor -> professor.getId())
+            .orElse(null);
     }
 }

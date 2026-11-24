@@ -13,6 +13,8 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
 	Optional<Professor> findByUsuarioId(Long usuarioId);
 
+	Optional<Professor> findByUsuarioEmail(String email);
+
 	List<Professor> findByDepartamentoIgnoreCase(String departamento);
 
 	boolean existsByRegistro(String registro);

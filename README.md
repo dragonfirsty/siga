@@ -2,6 +2,12 @@
 
 Sistema Integrado de Gestão Acadêmica desenvolvido como projeto da FATEC em Spring Boot.
 
+## Integrantes
+
+- Leonardo Moya
+- Vinicius Silvestre
+- Henrique Ferreira
+
 ## Stack
 
 - Java 21
@@ -45,10 +51,10 @@ O projeto usa branches por desenvolvedor para isolar o trabalho antes da integra
 
 ```bash
 git fetch --all
-git checkout Henrique
+git checkout main
 ```
 
-Substitua `Henrique` pelo nome da sua branch. Para listar todas:
+Para listar todas as branches:
 
 ```bash
 git branch -a
@@ -78,7 +84,7 @@ Com a aplicação rodando:
 
 - **Aplicação**: http://localhost:8080
 - **H2 Console** (banco em memória): http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:mem:testdb`
+  - JDBC URL: `jdbc:h2:mem:siga`
   - Usuário: `sa`
   - Senha: (deixar em branco)
 - **Swagger UI** (documentação da API): http://localhost:8080/swagger-ui.html
@@ -136,23 +142,30 @@ Para rodar com perfil específico (ex.: `dev`, `prod`):
 
 ## Configuração do banco PostgreSQL (produção)
 
-Adicione as seguintes propriedades em `application-prod.properties`:
+Configure as variáveis de ambiente e execute com o perfil `postgresql`:
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/siga
-spring.datasource.username=<usuario>
-spring.datasource.password=<senha>
-spring.datasource.driver-class-name=org.postgresql.Driver
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+```powershell
+$env:POSTGRES_URL="jdbc:postgresql://localhost:5432/siga"
+$env:POSTGRES_USER="siga"
+$env:POSTGRES_PASSWORD="siga"
+./mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=postgresql
+```
+
+No Linux ou macOS:
+
+```bash
+export POSTGRES_URL="jdbc:postgresql://localhost:5432/siga"
+export POSTGRES_USER="siga"
+export POSTGRES_PASSWORD="siga"
+./mvnw spring-boot:run -Dspring-boot.run.profiles=postgresql
 ```
 
 Em desenvolvimento, o H2 em memória é usado automaticamente sem configuração adicional.
 
 ## Fluxo de trabalho com Git
 
-1. Sempre trabalhar na sua branch (`Henrique`, `Fulano`, etc.), nunca direto na `main`.
-2. Antes de começar: `git pull origin main` para sincronizar com as últimas alterações.
+1. Sempre trabalhar na sua branch de desenvolvimento ou na `dev`, nunca direto na `main`.
+2. Antes de começar: `git pull origin dev` para sincronizar com as últimas alterações.
 3. Commits pequenos e com mensagens claras no padrão `Tipo: descrição` (ex.: `Feat: tela de login`, `Fix: validação de CPF`).
 4. Ao terminar uma feature, abrir um Pull Request para a `dev` ou `main` conforme combinado.
 
@@ -192,7 +205,3 @@ Limpe o cache local e tente novamente:
 ./mvnw dependency:purge-local-repository
 ./mvnw clean install
 ```
-
-## Licença
-
-Projeto acadêmico desenvolvido na FATEC.
