@@ -16,11 +16,10 @@ import org.springframework.security.core.Authentication;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/professor")
+@RequestMapping("/professor/aulas")
 public class ProfessorController {
 
     private final AulaService aulaService;
@@ -33,7 +32,7 @@ public class ProfessorController {
         this.roster = roster;
     }
 
-    @GetMapping("/aulas")
+    @GetMapping
     public String listarAulas(Model model, Authentication authentication) {
         Long professorId = buscarProfessorId(authentication);
         if (professorId == null) {
@@ -43,7 +42,7 @@ public class ProfessorController {
         return "professor/aulas";
     }
 
-    @GetMapping("/aulas/nova")
+    @GetMapping("/nova")
     public String formNovaAula(Model model, Authentication authentication) {
         Long professorId = buscarProfessorId(authentication);
         if (professorId == null) {
@@ -53,7 +52,7 @@ public class ProfessorController {
         return "professor/nova-aula";
     }
 
-    @PostMapping("/aulas/nova")
+    @PostMapping("/nova")
     public String criarAula(
             @RequestParam Long turmaId,
             @RequestParam String data,
@@ -70,7 +69,7 @@ public class ProfessorController {
         return "redirect:/professor/aulas/" + aula.getId() + "/presenca";
     }
 
-    @GetMapping("/aulas/{id}/presenca")
+    @GetMapping("/{id}/presenca")
     public String formPresenca(@PathVariable Long id, Model model) {
         Aula aula = aulaService.buscarPorId(id);
         model.addAttribute("aula", aula);
@@ -78,7 +77,7 @@ public class ProfessorController {
         return "professor/registrar-presenca";
     }
 
-    @PostMapping("/aulas/{id}/presenca")
+    @PostMapping("/{id}/presenca")
     public String salvarPresenca(@PathVariable Long id, @RequestParam Map<String, String> params) {
         Aula aula = aulaService.buscarPorId(id);
         Map<Long, Boolean> marcacoes = new HashMap<>();

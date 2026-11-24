@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.fatec.siga.domain.Curso;
 import com.fatec.siga.repository.CursoRepository;
@@ -13,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Service
+@Validated
 public class CursoService {
 
 	private final CursoRepository cursoRepository;
