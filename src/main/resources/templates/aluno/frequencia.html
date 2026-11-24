@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Minha Frequencia')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>Minha frequencia</h1>
+
+    <div class="card">
+        <p><strong>Frequencia geral:</strong>
+            <span th:text="${geral} + '%'"
+                  th:classappend="${geral >= 75} ? 'ok' : 'nao'">0%</span>
+        </p>
+    </div>
+
+    <table th:if="${!frequencias.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Disciplina / Turma</th>
+            <th>Aulas</th>
+            <th>Presencas</th>
+            <th>Percentual</th>
+            <th>Situacao</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="f : ${frequencias}">
+            <td th:text="${f.turmaNome}">Turma</td>
+            <td th:text="${f.totalAulas}">0</td>
+            <td th:text="${f.totalPresencas}">0</td>
+            <td th:text="${f.percentual} + '%'">0%</td>
+            <td>
+                <span th:if="${f.aprovadoPorFrequencia}" class="ok">Aprovado</span>
+                <span th:unless="${f.aprovadoPorFrequencia}" class="nao">Reprovado por falta</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="card" th:if="${frequencias.isEmpty()}">
+        <p>Ainda nao ha aulas realizadas para calcular a frequencia.</p>
+    </div>
+
+    <p style="margin-top:16px">
+        <a class="btn btn-sec" th:href="@{/aluno/aulas}">Voltar para minhas aulas</a>
+    </p>
+</main>
+</body>
+</html>

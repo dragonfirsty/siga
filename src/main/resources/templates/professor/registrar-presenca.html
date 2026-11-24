@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Registrar Presenca')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>Registrar presenca</h1>
+    <div class="card">
+        <p><strong>Turma:</strong> <span th:text="${aula.turmaNome}">Turma</span></p>
+        <p><strong>Data:</strong> <span th:text="${#temporals.format(aula.data, 'dd/MM/yyyy')}">01/01/2026</span></p>
+        <p><strong>Conteudo:</strong> <span th:text="${aula.conteudo}">Conteudo</span></p>
+    </div>
+
+    <form th:action="@{/professor/aulas/{id}/presenca(id=${aula.id})}" method="post">
+        <table>
+            <thead>
+            <tr>
+                <th>RA</th>
+                <th>Aluno</th>
+                <th>Presente</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="presenca : ${presencas}">
+                <td th:text="${presenca.ra}">RA000</td>
+                <td th:text="${presenca.alunoNome}">Aluno</td>
+                <td>
+                    <input type="checkbox"
+                           th:name="'presente_' + ${presenca.alunoId}"
+                           th:checked="${presenca.presente}">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p style="margin-top:16px">
+            <button type="submit" class="btn">Salvar presenca</button>
+            <a class="btn btn-sec" th:href="@{/professor/aulas}">Voltar</a>
+        </p>
+    </form>
+</main>
+</body>
+</html>

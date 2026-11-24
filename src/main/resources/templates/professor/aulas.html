@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Aulas do Professor')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>Minhas aulas</h1>
+    <p style="margin-bottom:16px">
+        <a class="btn" th:href="@{/professor/aulas/nova}">Criar nova aula</a>
+    </p>
+
+    <table th:if="${!aulas.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Data</th>
+            <th>Turma</th>
+            <th>Conteudo</th>
+            <th>Status</th>
+            <th>Presentes</th>
+            <th>Acao</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="aula : ${aulas}">
+            <td th:text="${#temporals.format(aula.data, 'dd/MM/yyyy')}">01/01/2026</td>
+            <td th:text="${aula.turmaNome}">Turma</td>
+            <td th:text="${aula.conteudo}">Conteudo</td>
+            <td>
+                <span class="badge" th:classappend="${aula.status.name() == 'REALIZADA'} ? 'badge-realizada' : 'badge-agendada'"
+                      th:text="${aula.status}">AGENDADA</span>
+            </td>
+            <td th:text="${aula.totalPresentes} + ' / ' + ${aula.totalAlunos}">0 / 0</td>
+            <td>
+                <a class="btn btn-sec" th:href="@{/professor/aulas/{id}/presenca(id=${aula.id})}">Registrar presenca</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="card" th:if="${aulas.isEmpty()}">
+        <p>Nenhuma aula criada ainda. Clique em "Criar nova aula" para comecar.</p>
+    </div>
+</main>
+</body>
+</html>
