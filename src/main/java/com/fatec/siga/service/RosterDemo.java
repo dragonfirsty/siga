@@ -2,63 +2,100 @@ package com.fatec.siga.service;
 
 import com.fatec.siga.dto.AlunoResumo;
 import com.fatec.siga.dto.TurmaResumo;
+import com.fatec.siga.domain.Aluno;
+import com.fatec.siga.domain.Matricula;
+import com.fatec.siga.domain.Professor;
+import com.fatec.siga.domain.Turma;
+import com.fatec.siga.repository.MatriculaRepository;
+import com.fatec.siga.repository.ProfessorRepository;
+import com.fatec.siga.repository.TurmaRepository;
+import com.fatec.siga.repository.AlunoRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
 public class RosterDemo {
 
-    private static final Long PROFESSOR_ID = 1L;
-    private static final String PROFESSOR_NOME = "Prof. Marcos Santos";
+    private final TurmaRepository turmaRepository;
+    private final MatriculaRepository matriculaRepository;
+    private final ProfessorRepository professorRepository;
+    private final AlunoRepository alunoRepository;
 
-    private static final List<TurmaResumo> TURMAS = List.of(
-            new TurmaResumo(101L, "ADS 3 Semestre - Noturno", "Programacao de Sitios Internet", PROFESSOR_ID, PROFESSOR_NOME),
-            new TurmaResumo(102L, "ADS 3 Semestre - Noturno", "Banco de Dados", PROFESSOR_ID, PROFESSOR_NOME),
-            new TurmaResumo(103L, "ADS 4 Semestre - Noturno", "Engenharia de Software", PROFESSOR_ID, PROFESSOR_NOME)
-    );
+    public RosterDemo(TurmaRepository turmaRepository, MatriculaRepository matriculaRepository,
+            ProfessorRepository professorRepository, AlunoRepository alunoRepository) {
+        this.turmaRepository = turmaRepository;
+        this.matriculaRepository = matriculaRepository;
+        this.professorRepository = professorRepository;
+        this.alunoRepository = alunoRepository;
+    }
 
-    private static final Map<Long, List<AlunoResumo>> ALUNOS_POR_TURMA = Map.of(
-            101L, List.of(
-                    new AlunoResumo(1L, "Henrique Ferreira", "RA001"),
-                    new AlunoResumo(2L, "Ana Vitoria Baraldi", "RA002"),
-                    new AlunoResumo(3L, "Thayna Camboim", "RA003"),
-                    new AlunoResumo(4L, "Guilherme Souza", "RA004")
-            ),
-            102L, List.of(
-                    new AlunoResumo(1L, "Henrique Ferreira", "RA001"),
-                    new AlunoResumo(5L, "Rafael Mendes", "RA005"),
-                    new AlunoResumo(6L, "Juliana Prado", "RA006")
-            ),
-            103L, List.of(
-                    new AlunoResumo(2L, "Ana Vitoria Baraldi", "RA002"),
-                    new AlunoResumo(4L, "Guilherme Souza", "RA004"),
-                    new AlunoResumo(7L, "Lucas Oliveira", "RA007")
-            )
-    );
-
+    @Transactional(readOnly = true)
     public List<TurmaResumo> listarTurmasDoProfessor(Long professorId) {
-        return TURMAS.stream().filter(t -> t.professorId().equals(professorId)).toList();
+        return turmaRepository.findByProfessorId(professorId).stream()
+            .filter(Turma::isAtiva)
+            .map(this::converterTurma)
+            .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TurmaResumo> listarTodasTurmas() {
-        return TURMAS;
+        return turmaRepository.findAll().stream()
+            .filter(Turma::isAtiva)
+            .map(this::converterTurma)
+            .toList();
     }
 
+    @Transactional(readOnly = true)
     public Optional<TurmaResumo> buscarTurma(Long turmaId) {
-        return TURMAS.stream().filter(t -> t.id().equals(turmaId)).findFirst();
+        return turmaRepository.findById(turmaId).map(this::converterTurma);
     }
 
+    @Transactional(readOnly = true)
     public List<AlunoResumo> alunosDaTurma(Long turmaId) {
-        return ALUNOS_POR_TURMA.getOrDefault(turmaId, List.of());
+        return matriculaRepository.findByTurmaId(turmaId).stream()
+            .filter(Matricula::isAtiva)
+            .map(Matricula::getAluno)
+            .map(this::converterAluno)
+            .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<Long> turmasDoAluno(Long alunoId) {
-        return ALUNOS_POR_TURMA.entrySet().stream()
-                .filter(e -> e.getValue().stream().anyMatch(a -> a.id().equals(alunoId)))
-                .map(Map.Entry::getKey)
-                .toList();
+        return matriculaRepository.findByAlunoId(alunoId).stream()
+            .filter(Matricula::isAtiva)
+            .map(Matricula::getTurma)
+            .map(Turma::getId)
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Professor> buscarProfessorPorEmail(String email) {
+        return professorRepository.findByUsuarioEmail(email);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Aluno> buscarAlunoPorEmail(String email) {
+        return alunoRepository.findByUsuarioEmail(email);
+    }
+
+    private TurmaResumo converterTurma(Turma turma) {
+        return new TurmaResumo(
+            turma.getId(),
+            turma.getCodigo(),
+            turma.getDisciplina().getNome(),
+            turma.getProfessor().getId(),
+            turma.getProfessor().getUsuario().getNome()
+        );
+    }
+
+    private AlunoResumo converterAluno(Aluno aluno) {
+        return new AlunoResumo(
+            aluno.getId(),
+            aluno.getUsuario().getNome(),
+            aluno.getMatricula()
+        );
     }
 }

@@ -8,14 +8,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
 @Controller
 @RequestMapping("/aluno")
 public class AlunoController {
-
-    private static final Long ALUNO_LOGADO = 1L;
 
     private final AulaRepository aulaRepository;
     private final PresencaService presencaService;
@@ -28,17 +27,34 @@ public class AlunoController {
     }
 
     @GetMapping("/aulas")
-    public String minhasAulas(Model model) {
-        List<Long> turmas = roster.turmasDoAluno(ALUNO_LOGADO);
+    public String minhasAulas(Model model, Authentication authentication) {
+        Long alunoId = buscarAlunoId(authentication);
+        if (alunoId == null) {
+            return "redirect:/login";
+        }
+        List<Long> turmas = roster.turmasDoAluno(alunoId);
         List<Aula> aulas = turmas.isEmpty() ? List.of() : aulaRepository.findByTurmaIdInOrderByDataDesc(turmas);
         model.addAttribute("aulas", aulas);
         return "aluno/minhas-aulas";
     }
 
     @GetMapping("/frequencia")
-    public String frequencia(Model model) {
-        model.addAttribute("frequencias", presencaService.calcularFrequenciaPorTurma(ALUNO_LOGADO));
-        model.addAttribute("geral", presencaService.percentualGeral(ALUNO_LOGADO));
+    public String frequencia(Model model, Authentication authentication) {
+        Long alunoId = buscarAlunoId(authentication);
+        if (alunoId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("frequencias", presencaService.calcularFrequenciaPorTurma(alunoId));
+        model.addAttribute("geral", presencaService.percentualGeral(alunoId));
         return "aluno/frequencia";
+    }
+
+    private Long buscarAlunoId(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+        return roster.buscarAlunoPorEmail(authentication.getName())
+            .map(aluno -> aluno.getId())
+            .orElse(null);
     }
 }
