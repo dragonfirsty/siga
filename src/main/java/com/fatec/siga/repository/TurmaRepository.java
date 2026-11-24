@@ -15,4 +15,8 @@ public interface TurmaRepository extends JpaRepository<Turma, Long> {
 	List<Turma> findByProfessorId(Long professorId);
 
 	List<Turma> findByAnoAndSemestre(Integer ano, Integer semestre);
+
+	boolean existsByCodigo(String codigo);
+
+	boolean existsByCodigoAndIdNot(String codigo, Long id);
 }

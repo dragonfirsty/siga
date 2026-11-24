@@ -29,7 +29,7 @@ public class Turma {
 	private Long id;
 
 	@NotBlank
-	@Column(nullable = false, length = 30)
+	@Column(nullable = false, unique = true, length = 30)
 	private String codigo;
 
 	@NotNull

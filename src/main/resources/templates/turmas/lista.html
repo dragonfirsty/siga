@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Turmas - SIGA</title>
+</head>
+<body>
+	<main>
+		<h1>Turmas</h1>
+
+		<p th:if="${mensagem}" th:text="${mensagem}" role="status"></p>
+		<a th:href="@{/admin/turmas/nova}">Nova turma</a>
+
+		<table>
+			<thead>
+				<tr>
+					<th>Código</th>
+					<th>Ano</th>
+					<th>Semestre</th>
+					<th>Curso</th>
+					<th>Disciplina</th>
+					<th>Professor</th>
+					<th>Status</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="turma : ${turmas}">
+					<td th:text="${turma.codigo}"></td>
+					<td th:text="${turma.ano}"></td>
+					<td th:text="${turma.semestre}"></td>
+					<td th:text="${turma.curso.nome}"></td>
+					<td th:text="${turma.disciplina.nome}"></td>
+					<td th:text="${turma.professor.usuario.nome}"></td>
+					<td th:text="${turma.ativa ? 'Ativa' : 'Inativa'}"></td>
+					<td>
+						<a th:href="@{/admin/turmas/{id}/editar(id=${turma.id})}">Editar</a>
+						<form th:action="@{/admin/turmas/{id}/excluir(id=${turma.id})}" method="post">
+							<button type="submit">Excluir</button>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</main>
+</body>
+</html>
