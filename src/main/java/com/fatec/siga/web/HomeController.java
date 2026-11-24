@@ -44,4 +44,9 @@ public class HomeController {
 	public String aluno() {
 		return "aluno/inicio";
 	}
+
+	@GetMapping("/inicio")
+	public String demonstracao() {
+		return "index";
+	}
 }
