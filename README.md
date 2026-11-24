@@ -90,6 +90,41 @@ Com a aplicação rodando:
 - **Swagger UI** (documentação da API): http://localhost:8080/swagger-ui.html
 - **API Docs JSON**: http://localhost:8080/v3/api-docs
 
+## Aplicação publicada
+
+- **Site**: https://siga2.onrender.com/
+- **Login**: https://siga2.onrender.com/login
+- **Swagger UI**: https://siga2.onrender.com/swagger-ui.html
+- **API Docs JSON**: https://siga2.onrender.com/v3/api-docs
+
+### Rotas web
+
+| Rota | Perfil | Função |
+|---|---|---|
+| `/login` | Público | Autenticação |
+| `/` | Autenticado | Redirecionamento conforme o perfil |
+| `/inicio` | Público | Página demonstrativa |
+| `/admin` | ADMIN | Área administrativa |
+| `/admin/cursos` | ADMIN | CRUD web de cursos |
+| `/admin/disciplinas` | ADMIN | CRUD web de disciplinas |
+| `/admin/turmas` | ADMIN | CRUD web de turmas |
+| `/professor/aulas` | PROFESSOR | Lista das aulas |
+| `/professor/aulas/nova` | PROFESSOR | Criação de aula |
+| `/professor/aulas/{id}/presenca` | PROFESSOR | Registro de presença |
+| `/aluno/aulas` | ALUNO | Consulta das aulas |
+| `/aluno/frequencia` | ALUNO | Consulta da frequência |
+
+### API REST
+
+| Recurso | Métodos | Rota base |
+|---|---|---|
+| Cursos | GET, POST, PUT, DELETE | `/api/cursos` |
+| Disciplinas | GET, POST, PUT, DELETE | `/api/disciplinas` |
+| Turmas | GET, POST, PUT, DELETE | `/api/turmas` |
+| ViaCEP | GET | `/api/enderecos/{cep}` |
+
+Os endpoints REST de cursos, disciplinas e turmas exigem autenticação como ADMIN.
+
 ## Build
 
 Para gerar o JAR executável:
