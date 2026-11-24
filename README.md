@@ -162,6 +162,19 @@ export POSTGRES_PASSWORD="siga"
 
 Em desenvolvimento, o H2 em memória é usado automaticamente sem configuração adicional.
 
+## Deploy no Render com Docker
+
+O projeto inclui um `Dockerfile` com Java 21 e não depende de o Render oferecer Java como runtime.
+
+No Render, crie o serviço web selecionando **Docker** e configure:
+
+- Branch: `main`
+- Dockerfile: `Dockerfile`
+- `SPRING_PROFILES_ACTIVE=postgresql`
+- `JDBC_DATABASE_URL=jdbc:postgresql://HOST:5432/BANCO`
+- `POSTGRES_USER=USUARIO`
+- `POSTGRES_PASSWORD=SENHA`
+
 ## Fluxo de trabalho com Git
 
 1. Sempre trabalhar na sua branch de desenvolvimento ou na `dev`, nunca direto na `main`.
