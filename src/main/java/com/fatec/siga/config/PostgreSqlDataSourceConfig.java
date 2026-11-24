@@ -1,7 +1,5 @@
 package com.fatec.siga.config;
 
-import java.net.URI;
-
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -58,40 +56,90 @@ public class PostgreSqlDataSourceConfig {
 	}
 
 	private DatabaseLocation normalizarDatabaseUrl(String configuredUrl) {
+		String username = null;
+		String password = null;
 		String url = configuredUrl == null || configuredUrl.isBlank()
-			? "jdbc:postgresql://localhost:5432/siga"
+			? "postgresql://localhost:5432/siga"
 			: configuredUrl.trim();
 
-		if (url.startsWith("jdbc:")) {
+		while (url.startsWith("jdbc:")) {
 			url = url.substring("jdbc:".length());
 		}
 		if (url.startsWith("postgres://")) {
 			url = "postgresql://" + url.substring("postgres://".length());
 		}
 
-		URI uri = URI.create(url);
-		String username = null;
-		String password = null;
+		int atIndex = url.lastIndexOf('@');
+		String hostPart;
+		String pathPart;
 
-		if (uri.getUserInfo() != null) {
-			String[] credenciais = uri.getUserInfo().split(":", 2);
-			username = credenciais[0];
-			if (credenciais.length == 2) {
-				password = credenciais[1];
+		if (atIndex >= 0) {
+			String credentialsPart = url.substring(0, atIndex);
+			hostPart = url.substring(atIndex + 1);
+
+			int credentialsSeparator = credentialsPart.lastIndexOf("//");
+			if (credentialsSeparator >= 0) {
+				credentialsPart = credentialsPart.substring(credentialsSeparator + 2);
+			} else if (credentialsPart.startsWith("postgresql://")) {
+				credentialsPart = credentialsPart.substring("postgresql://".length());
+			}
+
+			int colon = credentialsPart.indexOf(':');
+			if (colon >= 0) {
+				username = credentialsPart.substring(0, colon);
+				password = credentialsPart.substring(colon + 1);
+			}
+		} else {
+			hostPart = url;
+		}
+
+		if (hostPart.startsWith("postgresql://")) {
+			hostPart = hostPart.substring("postgresql://".length());
+		}
+		if (hostPart.startsWith("postgres://")) {
+			hostPart = hostPart.substring("postgres://".length());
+		}
+
+		int slash = hostPart.indexOf('/');
+		String hostAndPort;
+		if (slash >= 0) {
+			hostAndPort = hostPart.substring(0, slash);
+			pathPart = hostPart.substring(slash + 1);
+		} else {
+			hostAndPort = hostPart;
+			pathPart = "siga";
+		}
+
+		String host = hostAndPort;
+		int port = 5432;
+		int hostColon = hostAndPort.indexOf(':');
+		if (hostColon >= 0) {
+			host = hostAndPort.substring(0, hostColon);
+			try {
+				port = Integer.parseInt(hostAndPort.substring(hostColon + 1));
+			} catch (NumberFormatException ignored) {
+				port = 5432;
 			}
 		}
 
-		int port = uri.getPort() > 0 ? uri.getPort() : 5432;
-		String path = uri.getPath();
-		if (path == null || path.isBlank()) {
-			path = "/siga";
+		int pathColon = pathPart.indexOf(':');
+		if (pathColon >= 0) {
+			pathPart = pathPart.substring(0, pathColon);
+		}
+		int pathSlash = pathPart.indexOf('/');
+		if (pathSlash >= 0) {
+			pathPart = pathPart.substring(0, pathSlash);
+		}
+		int question = pathPart.indexOf('?');
+		if (question >= 0) {
+			pathPart = pathPart.substring(0, question);
 		}
 
-		String jdbcUrl = "jdbc:postgresql://" + uri.getHost() + ":" + port + path;
-		if (uri.getRawQuery() != null && !uri.getRawQuery().isBlank()) {
-			jdbcUrl += "?" + uri.getRawQuery();
+		if (pathPart.isBlank()) {
+			pathPart = "siga";
 		}
 
+		String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + "/" + pathPart;
 		return new DatabaseLocation(jdbcUrl, username, password);
 	}
 
