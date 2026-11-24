@@ -2,6 +2,12 @@
 
 Sistema Integrado de Gestão Acadêmica desenvolvido como projeto da FATEC em Spring Boot.
 
+## Integrantes
+
+- Leonardo Moya
+- Vinicius Silvestre
+- Henrique Ferreira
+
 ## Stack
 
 - Java 21
@@ -199,7 +205,3 @@ Limpe o cache local e tente novamente:
 ./mvnw dependency:purge-local-repository
 ./mvnw clean install
 ```
-
-## Licença
-
-Projeto acadêmico desenvolvido na FATEC.
