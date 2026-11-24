@@ -18,6 +18,8 @@ public class SecurityConfig {
 						.requestMatchers("/h2-console/**").permitAll()
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/api/cursos/**").hasRole("ADMIN")
+						.requestMatchers("/api/disciplinas/**").hasRole("ADMIN")
+						.requestMatchers("/api/turmas/**").hasRole("ADMIN")
 						.requestMatchers("/professor/**").hasRole("PROFESSOR")
 						.requestMatchers("/aluno/**").hasRole("ALUNO")
 						.anyRequest().authenticated())

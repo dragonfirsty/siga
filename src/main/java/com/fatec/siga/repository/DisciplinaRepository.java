@@ -14,4 +14,6 @@ public interface DisciplinaRepository extends JpaRepository<Disciplina, Long> {
 	List<Disciplina> findByCursoId(Long cursoId);
 
 	boolean existsByCodigo(String codigo);
+
+	boolean existsByCodigoAndIdNot(String codigo, Long id);
 }
