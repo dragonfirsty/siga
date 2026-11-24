@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Turma - SIGA</title>
+</head>
+<body>
+	<main>
+		<h1 th:text="${turmaId != null ? 'Editar turma' : 'Nova turma'}"></h1>
+
+		<p th:if="${erro}" th:text="${erro}" role="alert"></p>
+
+		<form th:object="${turma}"
+			th:action="${turmaId != null ? '/admin/turmas/' + turmaId : '/admin/turmas'}"
+			method="post">
+			<div>
+				<label for="codigo">Código</label>
+				<input id="codigo" th:field="*{codigo}" type="text" maxlength="30" required>
+				<p th:if="${#fields.hasErrors('codigo')}"
+					th:errors="*{codigo}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="ano">Ano</label>
+				<input id="ano" th:field="*{ano}" type="number" min="2020" max="2100" required>
+				<p th:if="${#fields.hasErrors('ano')}"
+					th:errors="*{ano}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="semestre">Semestre</label>
+				<select id="semestre" th:field="*{semestre}" required>
+					<option value="">Selecione</option>
+					<option value="1">1</option>
+					<option value="2">2</option>
+				</select>
+				<p th:if="${#fields.hasErrors('semestre')}"
+					th:errors="*{semestre}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="cursoId">Curso</label>
+				<select id="cursoId" th:field="*{cursoId}" required>
+					<option value="">Selecione</option>
+					<option th:each="curso : ${cursos}"
+						th:value="${curso.id}"
+						th:text="${curso.nome}">
+					</option>
+				</select>
+			</div>
+
+			<div>
+				<label for="disciplinaId">Disciplina</label>
+				<select id="disciplinaId" th:field="*{disciplinaId}" required>
+					<option value="">Selecione</option>
+					<option th:each="disciplina : ${disciplinas}"
+						th:value="${disciplina.id}"
+						th:text="${disciplina.nome}">
+					</option>
+				</select>
+			</div>
+
+			<div>
+				<label for="professorId">Professor</label>
+				<select id="professorId" th:field="*{professorId}" required>
+					<option value="">Selecione</option>
+					<option th:each="professor : ${professores}"
+						th:value="${professor.id}"
+						th:text="${professor.usuario.nome}">
+					</option>
+				</select>
+			</div>
+
+			<div>
+				<input id="ativa" th:field="*{ativa}" type="checkbox" value="true">
+				<label for="ativa">Turma ativa</label>
+			</div>
+
+			<button type="submit">Salvar</button>
+			<a th:href="@{/admin/turmas}">Cancelar</a>
+		</form>
+	</main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Administrador - SIGA</title>
+</head>
+<body>
+	<h1>Área do Administrador</h1>
+	<p>Usuário: <span sec:authentication="name"></span></p>
+	<nav>
+		<a href="/admin/cursos">Cursos</a>
+		<a href="/admin/disciplinas">Disciplinas</a>
+		<a href="/admin/turmas">Turmas</a>
+	</nav>
+	<form th:action="@{/logout}" method="post">
+		<button type="submit">Sair</button>
+	</form>
+</body>
+</html>

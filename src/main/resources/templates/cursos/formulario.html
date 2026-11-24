@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Curso - SIGA</title>
+</head>
+<body>
+	<main>
+		<h1 th:text="${cursoId != null ? 'Editar curso' : 'Novo curso'}"></h1>
+
+		<p th:if="${erro}" th:text="${erro}" role="alert"></p>
+
+		<form th:object="${curso}"
+			th:action="${cursoId != null ? '/admin/cursos/' + cursoId : '/admin/cursos'}"
+			method="post">
+			<div>
+				<label for="codigo">Código</label>
+				<input id="codigo" th:field="*{codigo}" type="text" maxlength="20" required>
+				<p th:if="${#fields.hasErrors('codigo')}"
+					th:errors="*{codigo}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="nome">Nome</label>
+				<input id="nome" th:field="*{nome}" type="text" maxlength="150" required>
+				<p th:if="${#fields.hasErrors('nome')}"
+					th:errors="*{nome}" role="alert"></p>
+			</div>
+
+			<div>
+				<input id="ativo" th:field="*{ativo}" type="checkbox" value="true">
+				<label for="ativo">Curso ativo</label>
+			</div>
+
+			<button type="submit">Salvar</button>
+			<a th:href="@{/admin/cursos}">Cancelar</a>
+		</form>
+	</main>
+</body>
+</html>

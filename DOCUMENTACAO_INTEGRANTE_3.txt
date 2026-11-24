@@ -1,0 +1,299 @@
+===============================================================================
+DOCUMENTACAO DO CODIGO - INTEGRANTE 3 (FREQUENCIA E INTERFACE)
+Projeto: SIGA 2 - Controle Academico de Chamadas
+Autor da parte: Henrique Ferreira
+===============================================================================
+
+OBJETIVO DESTA PARTE
+-------------------------------------------------------------------------------
+O Integrante 3 e responsavel pelo nucleo de frequencia do sistema:
+
+  - Entidades Aula e Presenca
+  - Servicos que criam aulas, registram presenca e calculam frequencia
+  - Tela do professor para criar aula e registrar presenca
+  - Tela do aluno para ver suas aulas e sua frequencia
+  - Integracao externa com a API ViaCEP
+
+DECISAO DE ARQUITETURA IMPORTANTE (explicar na arguicao)
+-------------------------------------------------------------------------------
+As entidades Aula e Presenca NAO usam @ManyToOne direto para Turma e Aluno
+(que sao entidades do Integrante 1). Em vez disso, guardam o ID como Long mais
+o nome denormalizado (turmaNome, alunoNome).
+
+Motivo: isso deixa o modulo de frequencia INDEPENDENTE do codigo do
+Integrante 1. O modulo compila, roda e e testavel sozinho. Na integracao
+final, esses campos Long podem virar relacionamentos @ManyToOne de verdade
+apontando para Turma e Aluno.
+
+O "roster" de alunos e turmas (quem esta em qual turma) vem da classe
+RosterDemo, que e um substituto temporario dos repositorios do Integrante 1.
+Quando o Integrante 1 entregar AlunoRepository e TurmaRepository, basta trocar
+o RosterDemo por esses repositorios.
+
+
+ESTRUTURA DE PASTAS DA MINHA PARTE
+-------------------------------------------------------------------------------
+src/main/java/com/fatec/siga/
+  model/
+    StatusAula.java         enum do ciclo de vida da aula
+    Aula.java               entidade da aula
+    Presenca.java           entidade da presenca de um aluno numa aula
+  repository/
+    AulaRepository.java     consultas de aula
+    PresencaRepository.java consultas de presenca
+  dto/
+    AlunoResumo.java        dados minimos de um aluno (record)
+    TurmaResumo.java        dados minimos de uma turma (record)
+    FrequenciaDisciplina.java  resultado do calculo de frequencia (record)
+    EnderecoViaCep.java     resposta da API ViaCEP (record)
+  service/
+    RosterDemo.java         fonte temporaria de turmas e alunos
+    AulaService.java        regras de criacao e consulta de aula
+    PresencaService.java    regras de registro e calculo de frequencia
+    ViaCepService.java      cliente HTTP da API ViaCEP
+  controller/
+    HomeController.java      pagina inicial
+    ProfessorController.java telas do professor
+    AlunoController.java     telas do aluno
+    EnderecoController.java  endpoint REST da consulta de CEP
+  config/
+    DadosExemplo.java        popula dados ficticios ao subir a aplicacao
+
+src/main/resources/templates/
+  fragments/layout.html             cabecalho e estilos compartilhados
+  index.html                        pagina inicial
+  professor/aulas.html              lista de aulas do professor
+  professor/nova-aula.html          formulario de criacao de aula
+  professor/registrar-presenca.html tela de marcar presenca
+  aluno/minhas-aulas.html           lista de aulas do aluno
+  aluno/frequencia.html             tela de frequencia por disciplina
+
+src/test/java/com/fatec/siga/
+  service/PresencaServiceTest.java  testes do fluxo de presenca e frequencia
+
+
+EXPLICACAO ARQUIVO POR ARQUIVO
+===============================================================================
+
+--- model/StatusAula.java ---
+Enum com tres estados: AGENDADA (aula criada, presenca ainda nao registrada),
+REALIZADA (presenca ja registrada) e CANCELADA (reserva para o futuro).
+E usado no campo status da Aula, persistido como String no banco.
+
+--- model/Aula.java ---
+Entidade JPA mapeada para a tabela "aula". Campos principais:
+  - id: chave primaria autoincremento
+  - turmaId + turmaNome: referencia denormalizada a turma
+  - professorId: dono da aula (usado para filtrar "minhas aulas")
+  - data, horaInicio, horaFim: quando a aula acontece
+  - conteudo: o que foi dado na aula
+  - status: StatusAula
+  - presencas: lista @OneToMany de Presenca, com cascade ALL (ao salvar a
+    aula, salva as presencas junto)
+Metodos auxiliares:
+  - adicionarPresenca: liga a presenca a esta aula (mantem os dois lados)
+  - getTotalPresentes / getTotalAlunos: usados na tela para mostrar "3 / 4"
+
+--- model/Presenca.java ---
+Entidade JPA mapeada para "presenca". Representa o resultado de um aluno em
+uma aula. Campos:
+  - aula: @ManyToOne obrigatorio (a qual aula pertence)
+  - alunoId + alunoNome + ra: referencia denormalizada ao aluno
+  - presente: boolean (true = presente, false = ausente)
+  - registradoEm: data/hora em que a presenca foi marcada
+Constraint unica (aula_id, aluno_id): o mesmo aluno nao pode ter duas
+presencas na mesma aula.
+Metodo marcar(boolean): define presente e grava o horario do registro.
+
+--- repository/AulaRepository.java ---
+Interface Spring Data. Metodos derivados do nome:
+  - findByProfessorIdOrderByDataDescHoraInicioDesc: aulas de um professor,
+    mais recentes primeiro (usado na tela do professor)
+  - findByTurmaIdOrderByDataDesc: aulas de uma turma
+  - findByTurmaIdInOrderByDataDesc: aulas de varias turmas (usado na tela do
+    aluno, que pode estar em mais de uma turma)
+
+--- repository/PresencaRepository.java ---
+  - findByAulaId: todas as presencas de uma aula
+  - findByAlunoId: todas as presencas de um aluno (base do calculo de
+    frequencia)
+  - countByAlunoIdAndPresenteTrue / countByAlunoId: contagens usadas no
+    percentual geral
+
+--- dto/AlunoResumo.java e dto/TurmaResumo.java ---
+Records imutaveis com os dados minimos de aluno e turma. Usados pelo
+RosterDemo e pelos controllers para montar as telas sem depender das
+entidades completas do Integrante 1.
+
+--- dto/FrequenciaDisciplina.java ---
+Record com o resultado do calculo de frequencia de um aluno em uma turma:
+total de aulas, total de presencas e percentual. O metodo
+isAprovadoPorFrequencia retorna true se o percentual for maior ou igual a 75,
+que e a regra padrao de frequencia minima.
+
+--- dto/EnderecoViaCep.java ---
+Record que mapeia a resposta JSON da API ViaCEP. @JsonIgnoreProperties ignora
+campos que nao usamos. O campo "erro" vem como true quando o CEP nao existe;
+o metodo naoEncontrado encapsula essa checagem.
+
+--- service/RosterDemo.java ---
+Fonte TEMPORARIA de dados de turma e aluno enquanto o Integrante 1 nao entrega
+os repositorios reais. Guarda em memoria 3 turmas e os alunos de cada uma.
+Metodos:
+  - listarTurmasDoProfessor: turmas de um professor
+  - buscarTurma: uma turma pelo id
+  - alunosDaTurma: alunos de uma turma (usado para gerar a lista de presenca)
+  - turmasDoAluno: em quais turmas um aluno esta (usado na tela do aluno)
+Na integracao final, essa classe sai e entram AlunoRepository/TurmaRepository.
+
+--- service/AulaService.java ---
+Regras de negocio da aula.
+  - criarAula: busca a turma no roster, cria a Aula e JA gera uma Presenca
+    (ainda nao marcada) para cada aluno da turma. Assim a tela de registro ja
+    aparece com a lista de alunos pronta.
+  - listarPorProfessor: aulas do professor logado
+  - buscarPorId: busca uma aula ou lanca excecao se nao existir
+  - concluirAula: muda o status para REALIZADA
+Anotado com @Transactional nos metodos que gravam, para garantir que aula e
+presencas sejam salvas juntas.
+
+--- service/PresencaService.java ---
+Coracao da parte do Integrante 3.
+  - registrarPresencas: recebe o id da aula e um mapa alunoId -> presente,
+    percorre as presencas da aula, marca cada uma e muda o status da aula para
+    REALIZADA.
+  - listarPresencasDaAula: presencas de uma aula
+  - calcularFrequenciaPorTurma: pega todas as presencas do aluno, agrupa por
+    turma considerando so aulas REALIZADAS, e para cada turma calcula
+    total de aulas, presencas e percentual. Retorna uma lista de
+    FrequenciaDisciplina.
+  - percentualGeral: percentual de presenca somando todas as turmas.
+
+--- service/ViaCepService.java ---
+Cliente HTTP da API ViaCEP usando RestClient (forma moderna do Spring de fazer
+chamada HTTP, substituta do RestTemplate). Fluxo:
+  - limpa o CEP deixando so digitos
+  - valida que tem 8 digitos (senao lanca IllegalArgumentException)
+  - chama https://viacep.com.br/ws/{cep}/json/
+  - se a resposta vier com erro=true, lanca NoSuchElementException
+Essa e a integracao externa exigida pelo projeto.
+
+--- controller/HomeController.java ---
+Mapeia a rota "/" para a pagina inicial (index.html), onde o usuario escolhe
+entrar como professor ou aluno.
+
+--- controller/ProfessorController.java ---
+Telas do professor. Rotas:
+  GET  /professor/aulas            lista as aulas
+  GET  /professor/aulas/nova       formulario de nova aula
+  POST /professor/aulas/nova       cria a aula e redireciona para o registro
+  GET  /professor/aulas/{id}/presenca   tela de marcar presenca
+  POST /professor/aulas/{id}/presenca   salva a presenca
+O professor logado esta fixo (PROFESSOR_LOGADO = 1) porque a autenticacao real
+e responsabilidade do Integrante 2. Na integracao, esse id vem do usuario
+logado pelo Spring Security.
+
+--- controller/AlunoController.java ---
+Telas do aluno. Rotas:
+  GET /aluno/aulas       lista as aulas das turmas do aluno
+  GET /aluno/frequencia  mostra a frequencia por disciplina e o percentual geral
+Tambem usa um aluno fixo (ALUNO_LOGADO = 1) pelo mesmo motivo acima.
+
+--- controller/EnderecoController.java ---
+Endpoint REST GET /api/enderecos/{cep} que devolve o endereco do ViaCEP em
+JSON. Trata erros: 400 para CEP invalido, 404 para CEP inexistente. Pode ser
+consumido via Ajax no front de cadastro.
+
+--- config/DadosExemplo.java ---
+Implementa CommandLineRunner: roda assim que a aplicacao sobe. Se nao houver
+nenhuma aula no banco, cria 3 aulas ja realizadas (com presencas marcadas) e
+1 aula futura, para a demonstracao ja ter dados. Facilita apresentar o
+sistema sem precisar cadastrar tudo na mao.
+
+--- templates/fragments/layout.html ---
+Fragmento Thymeleaf com o <head> (titulo e CSS) e o menu, reaproveitados por
+todas as paginas via th:replace. Centraliza o estilo num lugar so.
+
+--- templates/professor/*.html e templates/aluno/*.html ---
+Paginas Thymeleaf. Usam th:each para listar aulas e alunos, th:text para
+mostrar valores, th:href para montar links com o id da aula, e th:checked para
+deixar o checkbox marcado conforme a presenca. A tela de registrar presenca
+envia um checkbox "presente_{alunoId}" por aluno; o controller interpreta a
+presenca ou ausencia de cada checkbox.
+
+--- test/service/PresencaServiceTest.java ---
+Testes de integracao com @DataJpaTest (sobe um banco H2 so para o teste).
+Cobrem:
+  - criar aula gera uma presenca por aluno da turma
+  - registrar presenca marca os alunos certos e muda o status
+  - calculo de frequencia com aluno presente da 100% e aprovado
+  - calculo com aluno ausente da 0% e reprovado por falta
+
+
+COMO RODAR E TESTAR
+-------------------------------------------------------------------------------
+Subir a aplicacao:
+    ./mvnw spring-boot:run
+
+Acessos:
+    http://localhost:8080                 pagina inicial
+    http://localhost:8080/professor/aulas tela do professor
+    http://localhost:8080/aluno/aulas     tela do aluno
+    http://localhost:8080/aluno/frequencia frequencia do aluno
+    http://localhost:8080/api/enderecos/01310100   teste do ViaCEP
+    http://localhost:8080/h2-console      banco em memoria
+    http://localhost:8080/swagger-ui.html documentacao da API
+
+Rodar os testes:
+    ./mvnw test
+
+
+O QUE EU DEIXEI PRONTO (RESUMO PARA A ARGUICAO)
+-------------------------------------------------------------------------------
+  - 2 entidades (Aula, Presenca) com relacionamento @OneToMany/@ManyToOne
+  - 2 repositorios com consultas derivadas
+  - 3 servicos (Aula, Presenca, ViaCEP) com regras de negocio
+  - 4 controllers (Home, Professor, Aluno, Endereco REST)
+  - 7 telas Thymeleaf funcionais
+  - 1 integracao externa (ViaCEP) com tratamento de erro
+  - 1 classe de dados de exemplo para demonstracao
+  - 4 testes automatizados cobrindo o fluxo de presenca e frequencia
+
+
+O QUE DEPENDE DOS OUTROS INTEGRANTES
+-------------------------------------------------------------------------------
+Do Integrante 1 (dominio):
+  - Entidades Aluno, Professor, Turma, Matricula reais
+  - Quando existirem, trocar RosterDemo pelos repositorios reais e, se quiser,
+    converter turmaId/alunoId em relacionamentos @ManyToOne
+
+Do Integrante 2 (seguranca):
+  - Login e perfis. Quando pronto, trocar PROFESSOR_LOGADO e ALUNO_LOGADO
+    (hoje fixos em 1) pelo usuario autenticado via Spring Security
+
+
+PONTOS QUE POSSO SER PERGUNTADO NA ARGUICAO E AS RESPOSTAS
+-------------------------------------------------------------------------------
+P: Por que Aula tem turmaId Long em vez de um relacionamento com Turma?
+R: Para o modulo de frequencia compilar e ser testado de forma independente do
+   codigo do Integrante 1. Na integracao vira @ManyToOne.
+
+P: Como o sistema sabe quais alunos estao na turma?
+R: Hoje vem do RosterDemo (dados em memoria). Na versao final, vem da entidade
+   Matricula do Integrante 1.
+
+P: Como e calculada a frequencia?
+R: Percentual = (presencas / total de aulas realizadas) * 100, agrupado por
+   turma. Abaixo de 75 por cento o aluno e reprovado por falta.
+
+P: Por que usou RestClient e nao RestTemplate no ViaCEP?
+R: RestClient e a API moderna e recomendada do Spring 6, com sintaxe fluente.
+   O RestTemplate esta em modo de manutencao.
+
+P: Como e tratado o erro de CEP invalido?
+R: O service valida 8 digitos antes de chamar a API e checa o campo "erro" da
+   resposta. O controller devolve 400 ou 404 conforme o caso.
+
+===============================================================================
+Fim da documentacao.
+===============================================================================

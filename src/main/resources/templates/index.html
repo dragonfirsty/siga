@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('SIGA 2 - Inicio')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: menu}"></header>
+<main>
+    <h1>SIGA 2 - Controle Academico de Chamadas</h1>
+    <div class="card">
+        <p style="margin-bottom:12px">Selecione um perfil para navegar na demonstracao:</p>
+        <p>
+            <a class="btn" th:href="@{/professor/aulas}">Entrar como Professor</a>
+            <a class="btn" th:href="@{/aluno/aulas}">Entrar como Aluno</a>
+        </p>
+    </div>
+    <div class="card">
+        <h1 style="font-size:16px">Modulo de Frequencia (Integrante 3)</h1>
+        <p>O professor cria aulas e registra presenca. O aluno consulta suas aulas e sua frequencia por disciplina.</p>
+    </div>
+</main>
+</body>
+</html>

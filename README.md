@@ -98,11 +98,11 @@ O artefato final fica em `target/siga-0.0.1-SNAPSHOT.jar`. Para rodar o JAR:
 java -jar target/siga-0.0.1-SNAPSHOT.jar
 ```
 
-## Testes
+## Segurança
 
-```bash
-./mvnw test
-```
+O projeto possui login persistido com usuários e perfis armazenados via JPA.
+As credenciais fictícias de desenvolvimento e a configuração completa estão documentadas em
+[`SECURITY-SETUP.md`](./SECURITY-SETUP.md).
 
 ## Estrutura do projeto
 

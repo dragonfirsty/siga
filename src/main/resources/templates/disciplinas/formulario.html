@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Disciplina - SIGA</title>
+</head>
+<body>
+	<main>
+		<h1 th:text="${disciplinaId != null ? 'Editar disciplina' : 'Nova disciplina'}"></h1>
+
+		<p th:if="${erro}" th:text="${erro}" role="alert"></p>
+
+		<form th:object="${disciplina}"
+			th:action="${disciplinaId != null ? '/admin/disciplinas/' + disciplinaId : '/admin/disciplinas'}"
+			method="post">
+			<div>
+				<label for="codigo">Código</label>
+				<input id="codigo" th:field="*{codigo}" type="text" maxlength="20" required>
+				<p th:if="${#fields.hasErrors('codigo')}"
+					th:errors="*{codigo}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="nome">Nome</label>
+				<input id="nome" th:field="*{nome}" type="text" maxlength="150" required>
+				<p th:if="${#fields.hasErrors('nome')}"
+					th:errors="*{nome}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="cargaHoraria">Carga horária</label>
+				<input id="cargaHoraria" th:field="*{cargaHoraria}" type="number" min="1" required>
+				<p th:if="${#fields.hasErrors('cargaHoraria')}"
+					th:errors="*{cargaHoraria}" role="alert"></p>
+			</div>
+
+			<div>
+				<label for="cursoId">Curso</label>
+				<select id="cursoId" th:field="*{cursoId}" required>
+					<option value="">Selecione</option>
+					<option th:each="curso : ${cursos}"
+						th:value="${curso.id}"
+						th:text="${curso.nome}">
+					</option>
+				</select>
+				<p th:if="${#fields.hasErrors('cursoId')}"
+					th:errors="*{cursoId}" role="alert"></p>
+			</div>
+
+			<button type="submit">Salvar</button>
+			<a th:href="@{/admin/disciplinas}">Cancelar</a>
+		</form>
+	</main>
+</body>
+</html>
