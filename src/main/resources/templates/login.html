@@ -3,30 +3,105 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Entrar - SIGA</title>
+	<meta name="theme-color" content="#102a43">
+	<title>Acesso ao SIGA</title>
+	<link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-	<main>
-		<h1>Entrar no SIGA</h1>
+	<main class="login-layout">
+		<section class="brand-panel" aria-label="Apresentação do SIGA">
+			<a class="brand" th:href="@{/login}" aria-label="SIGA, página de acesso">
+				<span class="brand-symbol" aria-hidden="true">
+					<svg viewBox="0 0 48 48" focusable="false">
+						<path d="M24 4 43 14.5v19L24 44 5 33.5v-19L24 4Z"></path>
+						<path d="M16 19.5c0-2.2 2.8-4 8-4s8 1.8 8 4-2.8 4-8 4-8 1.8-8 4 2.8 4 8 4 8-1.8 8-4"></path>
+						<path d="M24 15.5v16"></path>
+					</svg>
+				</span>
+				<span class="brand-name">SIGA</span>
+			</a>
 
-		<div th:if="${param.error}">
-			<p role="alert">Usuário ou senha inválidos.</p>
-		</div>
-		<div th:if="${param.logout}">
-			<p role="status">Você saiu do sistema.</p>
-		</div>
+			<div class="brand-copy">
+				<p class="eyebrow">Sistema Integrado de Gestão Acadêmica</p>
+				<h1>Conhecimento que conecta, educação que transforma.</h1>
+				<p class="brand-description">Acompanhe sua jornada acadêmica em um só lugar.</p>
+			</div>
 
-		<form th:action="@{/login}" method="post">
-			<div>
-				<label for="username">E-mail</label>
-				<input id="username" name="username" type="email" autocomplete="username" required>
+			<div class="brand-footer">
+				<span class="status-indicator" aria-hidden="true"></span>
+				<span>Seu ambiente acadêmico, sempre por perto.</span>
 			</div>
-			<div>
-				<label for="password">Senha</label>
-				<input id="password" name="password" type="password" autocomplete="current-password" required>
+		</section>
+
+		<section class="form-panel" aria-labelledby="login-title">
+			<div class="login-card">
+				<div class="mobile-brand" aria-hidden="true">SIGA</div>
+				<p class="eyebrow form-eyebrow">Bem-vindo de volta</p>
+				<h2 id="login-title">Acesse sua conta</h2>
+				<p class="form-description">Entre com seu e-mail institucional para continuar.</p>
+
+				<div class="feedback feedback-error" th:if="${param.error}" role="alert">
+					<span class="feedback-icon" aria-hidden="true">!</span>
+					<p>Não foi possível entrar. Confira seu e-mail e sua senha.</p>
+				</div>
+				<div class="feedback feedback-success" th:if="${param.logout}" role="status">
+					<span class="feedback-icon" aria-hidden="true">✓</span>
+					<p>Sua sessão foi encerrada com segurança.</p>
+				</div>
+
+				<form class="login-form" th:action="@{/login}" method="post">
+					<div class="form-field">
+						<label for="username">E-mail</label>
+						<div class="input-wrap">
+							<svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+								<rect x="3" y="5" width="18" height="14" rx="2"></rect>
+								<path d="m4 7 8 6 8-6"></path>
+							</svg>
+							<input id="username" name="username" type="email" placeholder="voce@instituicao.edu.br"
+								autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+						</div>
+					</div>
+
+					<div class="form-field">
+						<div class="label-row">
+							<label for="password">Senha</label>
+						</div>
+						<div class="input-wrap">
+							<svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+								<rect x="4" y="10" width="16" height="11" rx="2"></rect>
+								<path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+							</svg>
+							<input id="password" name="password" type="password" placeholder="Digite sua senha"
+								autocomplete="current-password" required>
+							<button class="password-toggle" type="button" aria-label="Mostrar senha"
+								aria-controls="password" aria-pressed="false" data-password-toggle>
+								<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+									<path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path>
+									<circle cx="12" cy="12" r="2.5"></circle>
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<button class="submit-button" type="submit">
+						<span>Entrar na plataforma</span>
+						<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+							<path d="M5 12h14M13 6l6 6-6 6"></path>
+						</svg>
+					</button>
+				</form>
+
+				<p class="security-note">
+					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+						<rect x="4" y="10" width="16" height="11" rx="2"></rect>
+						<path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+					</svg>
+					Seu acesso é protegido e suas informações são privadas.
+				</p>
 			</div>
-			<button type="submit">Entrar</button>
-		</form>
+			<footer class="page-footer">SIGA <span aria-hidden="true">·</span> Gestão acadêmica</footer>
+		</section>
 	</main>
+	<script th:src="@{/js/login.js}" defer></script>
 </body>
 </html>
