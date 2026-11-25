@@ -83,6 +83,9 @@ class SecurityAuthorizationIntegrationTest {
 		SessaoAutenticada sessao = autenticar("aluno@siga.local", "aluno123");
 
 		assertEquals(200, get(sessao, "/aluno").statusCode());
+		HttpResponse<String> frequencia = get(sessao, "/aluno/frequencia");
+		assertEquals(200, frequencia.statusCode());
+		assertTrue(frequencia.body().contains("Minha frequencia"));
 		assertEquals(403, get(sessao, "/admin").statusCode());
 		assertEquals(403, get(sessao, "/professor").statusCode());
 	}
