@@ -124,13 +124,25 @@ Disponibiliza `GET /login`.
 
 Arquivo: `src/main/resources/templates/login.html`
 
-Possui:
+Foi criada uma interface responsiva com identidade visual própria do SIGA, painel institucional em telas maiores e formulário centralizado em dispositivos menores. A página não depende de imagens ou bibliotecas de interface externas.
 
-- campo de e-mail;
-- campo de senha;
-- envio automático para `POST /login`;
-- mensagem de credenciais inválidas;
-- mensagem de logout concluído.
+O formulário mantém os nomes `username` e `password` esperados pela configuração padrão do Spring Security. `th:action="@{/login}"` preserva a integração com Thymeleaf e a inclusão do token CSRF. O identificador `username` recebe o e-mail usado pelo `UsuarioDetailsService`.
+
+A interface também inclui:
+
+- estados acessíveis para erro de autenticação (`?error`) e logout (`?logout`);
+- exibição e ocultação da senha com botão acessível por teclado;
+- atributos de autocomplete adequados para e-mail e senha;
+- foco visível, mensagens com regiões semânticas e adaptação a movimento reduzido;
+- aviso visual de segurança sem prometer funcionalidades de recuperação de senha.
+
+Arquivo: `src/main/resources/static/css/login.css`
+
+Define identidade visual, cores, tipografia com fontes locais do sistema, campos, botões, estados de feedback e pontos de quebra para telas menores. O arquivo não altera as regras de autenticação nem a autorização e não depende de serviços externos.
+
+Arquivo: `src/main/resources/static/js/login.js`
+
+Controla somente o botão de exibir ou ocultar senha. O envio das credenciais permanece a cargo do filtro do Spring Security.
 
 ## Telas iniciais por perfil
 
@@ -188,21 +200,22 @@ Esse vínculo permite localizar os dados específicos do usuário sem duplicar e
 
 ## Testes
 
-O arquivo `src/test/java/com/fatec/siga/SigaApplicationTests.java` foi removido conforme a solicitação.
-Não há arquivos unitários em `src/test` neste estado do projeto.
+O teste unitário `src/test/java/com/fatec/siga/service/PresencaServiceTest.java` foi encontrado e removido conforme a solicitação. Não foram criados testes unitários para esta alteração.
 
 ## Como validar manualmente
 
 1. execute `.\mvnw.cmd spring-boot:run`;
 2. acesse `http://localhost:8080`;
-3. faça login com um dos usuários da tabela de dados iniciais;
-4. confirme o redirecionamento para a tela correspondente ao perfil;
-5. tente acessar uma área pertencente a outro perfil;
-6. confirme que o acesso é negado;
-7. faça logout e confirme o retorno para `/login?logout`.
+3. confira a interface em uma janela larga e em uma janela estreita;
+4. faça login com um dos usuários da tabela de dados iniciais;
+5. confirme o redirecionamento para a tela correspondente ao perfil;
+6. tente acessar uma área pertencente a outro perfil;
+7. confirme que o acesso é negado;
+8. faça logout e confirme o retorno para `/login?logout`.
 
 A aplicação foi compilada com JDK 21 e iniciada com sucesso na porta 8080.
 O login persistido do usuário administrador também foi validado manualmente, com redirecionamento para `/admin`.
+A tela de login foi conferida no navegador em largura desktop e móvel; o botão de exibir senha e a mensagem de credenciais inválidas também foram verificados manualmente.
 
 Credenciais para testes locais:
 
