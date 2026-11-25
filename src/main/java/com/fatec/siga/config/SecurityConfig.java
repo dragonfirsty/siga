@@ -14,16 +14,31 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()
+						.requestMatchers(
+								"/login",
+								"/css/**",
+								"/js/**",
+								"/images/**",
+								"/webjars/**",
+								"/favicon.ico",
+								"/error").permitAll()
 						.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-						.requestMatchers("/h2-console/**").permitAll()
-						.requestMatchers("/admin/**").hasRole("ADMIN")
-						.requestMatchers("/api/cursos/**").hasRole("ADMIN")
-						.requestMatchers("/api/disciplinas/**").hasRole("ADMIN")
-						.requestMatchers("/api/turmas/**").hasRole("ADMIN")
-						.requestMatchers("/professor/**").hasRole("PROFESSOR")
-						.requestMatchers("/aluno/**").hasRole("ALUNO")
-						.anyRequest().authenticated())
+						.requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+						.requestMatchers(
+								"/api/cursos",
+								"/api/cursos/**",
+								"/api/disciplinas",
+								"/api/disciplinas/**",
+								"/api/turmas",
+								"/api/turmas/**",
+								"/api/enderecos",
+								"/api/enderecos/**",
+								"/h2-console",
+								"/h2-console/**").hasRole("ADMIN")
+						.requestMatchers("/professor", "/professor/**").hasRole("PROFESSOR")
+						.requestMatchers("/aluno", "/aluno/**").hasRole("ALUNO")
+						.requestMatchers("/", "/inicio").authenticated()
+						.anyRequest().denyAll())
 				.formLogin(form -> form
 						.loginPage("/login")
 						.loginProcessingUrl("/login")
