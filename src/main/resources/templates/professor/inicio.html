@@ -5,16 +5,17 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Professor - SIGA</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-	<h1>Área do Professor</h1>
-	<p>Usuário: <span sec:authentication="name"></span></p>
-	<nav>
-		<a href="/professor/aulas">Aulas</a>
-		<a href="/professor/presencas">Presenças</a>
-	</nav>
-	<form th:action="@{/logout}" method="post">
-		<button type="submit">Sair</button>
-	</form>
+	<header th:replace="~{fragments/layout :: menu}"></header>
+	<main>
+		<h1>Área do Professor</h1>
+		<div class="card">
+			<p>Bem-vindo, <strong sec:authentication="name"></strong>.</p>
+			<p>Acesse suas aulas para criar encontros e registrar a presença dos alunos.</p>
+			<p style="margin-top: 16px"><a class="btn" th:href="@{/professor/aulas}">Acessar minhas aulas</a></p>
+		</div>
+	</main>
 </body>
 </html>

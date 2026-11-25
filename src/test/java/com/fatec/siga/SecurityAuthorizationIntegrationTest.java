@@ -1,6 +1,7 @@
 package com.fatec.siga;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.CookieManager;
@@ -52,6 +53,11 @@ class SecurityAuthorizationIntegrationTest {
 		SessaoAutenticada sessao = autenticar("admin@siga.local", "admin123");
 
 		assertEquals(200, get(sessao, "/admin").statusCode());
+		for (String path : new String[] { "/admin/cursos", "/admin/disciplinas", "/admin/turmas" }) {
+			HttpResponse<String> response = get(sessao, path);
+			assertEquals(200, response.statusCode(), path);
+			assertTrue(response.body().contains("/css/app.css"), path);
+		}
 		assertEquals(400, post(sessao, "/api/cursos", obterTokenCsrf(sessao.client()), "{}").statusCode());
 		assertEquals(403, get(sessao, "/professor").statusCode());
 		assertEquals(403, get(sessao, "/aluno").statusCode());
@@ -62,6 +68,11 @@ class SecurityAuthorizationIntegrationTest {
 		SessaoAutenticada sessao = autenticar("professor@siga.local", "professor123");
 
 		assertEquals(200, get(sessao, "/professor").statusCode());
+		HttpResponse<String> aulas = get(sessao, "/professor/aulas");
+		assertEquals(200, aulas.statusCode());
+		assertTrue(aulas.body().contains("/css/app.css"));
+		assertFalse(aulas.body().contains("/professor/presencas"));
+		assertEquals(302, get(sessao, "/professor/presencas").statusCode());
 		assertEquals(403, get(sessao, "/admin").statusCode());
 		assertEquals(403, get(sessao, "/aluno").statusCode());
 		assertEquals(403, post(sessao, "/api/cursos", obterTokenCsrf(sessao.client()), "{}").statusCode());
