@@ -5,16 +5,20 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Aluno - SIGA</title>
+	<link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-	<h1>Área do Aluno</h1>
-	<p>Usuário: <span sec:authentication="name"></span></p>
-	<nav>
-		<a href="/aluno/aulas">Minhas aulas</a>
-		<a href="/aluno/frequencia">Minha frequência</a>
-	</nav>
-	<form th:action="@{/logout}" method="post">
-		<button type="submit">Sair</button>
-	</form>
+	<header th:replace="~{fragments/layout :: menu}"></header>
+	<main>
+		<h1>Área do Aluno</h1>
+		<div class="card">
+			<p>Bem-vindo, <strong sec:authentication="name"></strong>.</p>
+			<p>Acompanhe suas aulas e consulte sua frequência acadêmica.</p>
+			<p style="margin-top: 16px">
+				<a class="btn" th:href="@{/aluno/aulas}">Minhas aulas</a>
+				<a class="btn btn-sec" th:href="@{/aluno/frequencia}">Minha frequência</a>
+			</p>
+		</div>
+	</main>
 </body>
 </html>

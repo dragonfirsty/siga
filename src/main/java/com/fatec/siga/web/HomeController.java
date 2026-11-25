@@ -40,6 +40,11 @@ public class HomeController {
 		return "professor/inicio";
 	}
 
+	@GetMapping("/professor/presencas")
+	public String presencasProfessor() {
+		return "redirect:/professor/aulas";
+	}
+
 	@GetMapping("/aluno")
 	public String aluno() {
 		return "aluno/inicio";
