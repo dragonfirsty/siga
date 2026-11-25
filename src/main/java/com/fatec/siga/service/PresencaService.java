@@ -43,6 +43,7 @@ public class PresencaService {
         return presencaRepository.findByAulaId(aulaId);
     }
 
+    @Transactional(readOnly = true)
     public List<FrequenciaDisciplina> calcularFrequenciaPorTurma(Long alunoId) {
         List<Presenca> presencas = presencaRepository.findByAlunoId(alunoId);
 
